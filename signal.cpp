@@ -19,28 +19,22 @@ signal::signal(int port){
  * Calibration of background based on averaging 
  */
 void signal::calibrate(){
-#ifdef ARDUINO_ENVIRONMENT 
-    calib = 0;
-    uint32_t samp=0;
-    for (uint16_t ind=0; ind<10000; ind++) {
-	//acquire background noise
-	samp += analogRead(pin) * scale;
-    }
-    calib = samp/10000;
-#endif
+    #ifdef ARDUINO_ENVIRONMENT > 0
+        calib = (analogRead(pin)+analogRead(pin)+analogRead(pin)+analogRead(pin))/4; //acquire background noise
+    #endif
 }
 /**
  * Sampling of the sound: Based on storing values minus average background noise
  */
 void signal::sample(){
-	int i = 0;
-	while ( i < 32){
-#ifdef ARDUINO_ENVIRONMENT
-		arr[i] = (analogRead(pin)*scale-calib);
-#endif
-		i++;
-	}
-	
+        int i = 0;
+        while ( i < 32){
+        #if ARDUINO_ENVIRONMENT > 0
+                arr[i] = analogRead(pin)-calib;
+        #endif
+                i++;
+        }
+
 }
 /**
  * An estimate of background noise
